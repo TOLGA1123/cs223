@@ -1,0 +1,240 @@
+module rshift_reg_8bit_tb();
+logic clk,rst,load,shr,shr_in;
+logic [7:0]d;
+logic [7:0]q;
+rshift_reg_8bit dut(clk,rst,load,shr,shr_in,d,q);
+    always
+        begin
+        clk=0; #5;
+        clk=1; #5;
+        end
+        initial begin
+        d = 8'b10001000;
+        shr_in = 1;
+        rst = 1; #100;
+        load = 0; shr = 0; #100;
+        load = 0; shr = 1; #100;
+        load = 1; shr = 0; #100;
+        load = 1; shr = 1; #100;
+        rst =0;#100;
+        load = 0; shr = 0; #100;
+        load = 0; shr = 1; #100;
+        load = 1; shr = 0; #100;
+        load = 1; shr = 1; #100;
+        rst = 1; #100;
+end     
+endmodule
+module serial_adder_tb();
+logic clk,rst,load,shr;
+logic [7:0]a; logic [7:0]b; logic [7:0]c;
+    serial_adder dut(clk,rst,load,shr,a,b,c);
+    always
+        begin
+        clk = 0; #5;
+        clk = 1; #5;
+        end
+        initial begin
+        a=8'b01000000;b=8'b00000010;
+                rst = 1; #100;
+                load = 0; shr = 0; #100;
+                load = 1; shr=0; #100;
+                load = 0; shr=1; #100;
+                load = 1; shr=1; #100;
+                rst = 0; #100;
+                load = 0; shr = 0; #100;
+                load = 1; shr=0; #100;
+                load = 0; shr=1; #100;
+                load = 1; shr=1; #100;
+                rst = 1; #100;
+        end
+endmodule
+## This file is a general .xdc for the Basys3 rev B board
+## To use it in a project:
+## - uncomment the lines corresponding to used pins
+## - rename the used ports (in each line, after get_ports) according to the top level signal names in the project
+
+# Clock signal
+set_property PACKAGE_PIN W5 [get_ports clk]							
+	set_property IOSTANDARD LVCMOS33 [get_ports clk]
+	create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
+ 
+# Switches
+set_property PACKAGE_PIN V17 [get_ports {b[0]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {b[0]}]
+set_property PACKAGE_PIN V16 [get_ports {b[1]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {b[1]}]
+set_property PACKAGE_PIN W16 [get_ports {b[2]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {b[2]}]
+set_property PACKAGE_PIN W17 [get_ports {b[3]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {b[3]}]
+set_property PACKAGE_PIN W15 [get_ports {b[4]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {b[4]}]
+set_property PACKAGE_PIN V15 [get_ports {b[5]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {b[5]}]
+set_property PACKAGE_PIN W14 [get_ports {b[6]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {b[6]}]
+set_property PACKAGE_PIN W13 [get_ports {b[7]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {b[7]}]
+set_property PACKAGE_PIN V2 [get_ports {a[0]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {a[0]}]
+set_property PACKAGE_PIN T3 [get_ports {a[1]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {a[1]}]
+set_property PACKAGE_PIN T2 [get_ports {a[2]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {a[2]}]
+set_property PACKAGE_PIN R3 [get_ports {a[3]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {a[3]}]
+set_property PACKAGE_PIN W2 [get_ports {a[4]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {a[4]}]
+set_property PACKAGE_PIN U1 [get_ports {a[5]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {a[5]}]
+set_property PACKAGE_PIN T1 [get_ports {a[6]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {a[6]}]
+set_property PACKAGE_PIN R2 [get_ports {a[7]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {a[7]}]
+ 
+
+# LEDs
+set_property PACKAGE_PIN U16 [get_ports {c[0]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {c[0]}]
+set_property PACKAGE_PIN E19 [get_ports {c[1]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {c[1]}]
+set_property PACKAGE_PIN U19 [get_ports {c[2]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {c[2]}]
+set_property PACKAGE_PIN V19 [get_ports {c[3]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {c[3]}]
+set_property PACKAGE_PIN W18 [get_ports {c[4]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {c[4]}]
+set_property PACKAGE_PIN U15 [get_ports {c[5]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {c[5]}]
+set_property PACKAGE_PIN U14 [get_ports {c[6]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {c[6]}]
+set_property PACKAGE_PIN V14 [get_ports {c[7]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {c[7]}]
+#set_property PACKAGE_PIN V13 [get_ports {LED[8]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[8]}]
+#set_property PACKAGE_PIN V3 [get_ports {LED[9]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[9]}]
+#set_property PACKAGE_PIN W3 [get_ports {LED[10]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[10]}]
+#set_property PACKAGE_PIN U3 [get_ports {LED[11]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[11]}]
+#set_property PACKAGE_PIN P3 [get_ports {LED[12]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[12]}]
+#set_property PACKAGE_PIN N3 [get_ports {LED[13]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[13]}]
+#set_property PACKAGE_PIN P1 [get_ports {LED[14]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[14]}]
+#set_property PACKAGE_PIN L1 [get_ports {LED[15]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[15]}]
+	
+	
+
+##Buttons
+set_property PACKAGE_PIN U18 [get_ports shr]						
+	set_property IOSTANDARD LVCMOS33 [get_ports shr]
+#set_property PACKAGE_PIN T18 [get_ports btnU]						
+	#set_property IOSTANDARD LVCMOS33 [get_ports btnU]
+set_property PACKAGE_PIN W19 [get_ports rst]						
+	set_property IOSTANDARD LVCMOS33 [get_ports rst]
+set_property PACKAGE_PIN T17 [get_ports load]						
+	set_property IOSTANDARD LVCMOS33 [get_ports load]
+#set_property PACKAGE_PIN U17 [get_ports btnD]						
+	#set_property IOSTANDARD LVCMOS33 [get_ports btnD]
+ 
+
+
+module d_flipflop(
+input logic d, clk, rst,
+output logic q
+    );
+    always_ff @(posedge clk)
+    begin
+    if(rst) q<=0;
+    else q<=d;
+    end
+    
+endmodule
+module mux4to1(
+input logic i0,i1,i2,i3, s0,s1,
+output logic out
+    );
+    assign out = s1 ? (s0 ? i3:i2) : (s0 ? i1:i0); // reverse order s1s0=11 maintain s1s0=10 shift s1s0=01 load s1s0=00 maintain
+    
+endmodule
+module full_adder(
+input logic a,b,cin,
+output logic s,cout
+    );
+    logic p,g;
+    assign p = a^b;
+    assign g = a&b;
+    assign s = p^cin;
+    assign cout = g|(p&cin);
+endmodule
+module rshift_reg_8bit(
+input logic clk, rst, load, shr, shr_in, [7:0]d,
+output logic [7:0] q
+    );
+    logic out[7:0];
+    mux4to1 mux_8(q[7],d[7],shr_in,q[7],load,shr,out[7]);
+    d_flipflop ff_8(out[7],clk,rst,q[7]);
+    mux4to1 mux_7(q[6],d[6],q[7],q[6],load,shr,out[6]);
+    d_flipflop ff_7(out[6],clk,rst,q[6]);
+    mux4to1 mux_6(q[5],d[5],q[6],q[5],load,shr,out[5]);
+    d_flipflop ff_6(out[5],clk,rst,q[5]);
+    mux4to1 mux_5(q[4],d[4],q[5],q[4],load,shr,out[4]);
+    d_flipflop ff_5(out[4],clk,rst,q[4]);
+    mux4to1 mux_4(q[3],d[3],q[4],q[3],load,shr,out[3]);
+    d_flipflop ff_4(out[3],clk,rst,q[3]);
+    mux4to1 mux_3(q[2],d[2],q[3],q[2],load,shr,out[2]);
+    d_flipflop ff_3(out[2],clk,rst,q[2]);
+    mux4to1 mux_2(q[1],d[1],q[2],q[1],load,shr,out[1]);
+    d_flipflop ff_2(out[1],clk,rst,q[1]);
+    mux4to1 mux_1(q[0],d[0],q[1],q[0],load,shr,out[0]);
+    d_flipflop ff_1(out[0],clk,rst,q[0]);
+    
+endmodule
+module serial_adder(input logic clk,rst,load,shr, input logic [7:0]a, input logic [7:0]b, 
+output logic [7:0]c);
+logic [7:0] x;
+logic [7:0] y;
+logic sum,cin,cout;
+logic [3:0]count;
+logic run;
+rshift_reg_8bit regA(clk,rst,load,shr,0,a,x);
+rshift_reg_8bit regB(clk,rst,load,shr,0,b,y);
+full_adder adder(x[0],y[0],cin,sum,cout);
+d_flipflop ff(cout,clk,rst,cin);
+rshift_reg_8bit regC(clk,rst,load,run,sum,8'b00000000,c);
+always@(posedge clk)
+if(rst|load) //maybe no load here
+count <= 8;
+else if(run) count <= count -1;
+assign run =|count;
+
+endmodule
+module Clock_Divider(input logic clk_in, input logic reset,
+output logic clk_out
+);
+logic [31:0] counter = 32'd0;
+parameter divisor = 32'd150000000;
+    always@(posedge clk_in, posedge reset)
+    begin
+    if(reset) counter <= 32'd0;
+    else if(counter == divisor-1) counter <= 32'd0;
+    else counter <= counter+1;
+    end
+    always@ (posedge clk_in, posedge reset)
+    begin
+    if(reset) clk_out <= 32'd0;
+    else if(counter == divisor-1) clk_out <= ~clk_out;
+    else clk_out <= clk_out;
+    end
+endmodule
+module serial_adder_slowclk(
+input logic clk,rst,load,shr, input logic [7:0]a, input logic [7:0]b,
+output logic [7:0]c);
+logic slow_clk;
+Clock_Divider divide(clk,rst,slow_clk);
+serial_adder adder(slow_clk,rst,load,shr,a,b,c);
+endmodule

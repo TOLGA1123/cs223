@@ -1,0 +1,266 @@
+
+module fsm_3sec(
+input logic clk, reset, SA, SB, 
+output logic [2:0] LA, [2:0] LB
+ );
+ logic slow_clock;
+ Clock_Divider divide(clk,reset,slow_clock);
+ fsm traffic_light(slow_clock,reset,SA,SB,LA,LB);
+endmodule
+module Clock_Divider(input logic clk_in, input logic reset,
+output logic clk_out
+);
+logic [31:0] counter = 32'd0;
+parameter divisor = 32'd150000000;
+    always@(posedge clk_in, posedge reset)
+    begin
+    if(reset) counter <= 32'd0;
+    else if(counter == divisor-1) counter <= 32'd0;
+    else counter <= counter+1;
+    end
+    always@ (posedge clk_in, posedge reset)
+    begin
+    if(reset) clk_out <= 32'd0;
+    else if(counter == divisor-1) clk_out <= ~clk_out;
+    else clk_out <= clk_out;
+    end
+//    counter <= counter + 32'd1;
+//    if(counter >= (divisor-1))
+//    counter <= 32'd0;
+//    clk_out <= (counter < divisor/2)?1'b1:1'b0;
+//    end
+//    module Clock_Divider(input logic clk_in,
+//    output logic clk_out
+//    );
+//    logic [31:0] counter = 32'd0;
+//    parameter divisor = 32'd150000000;
+//        always@(posedge clk_in)
+//        begin
+//        if(counter == (divisor-1))
+//        counter <= 32'd0;
+//        else
+//        counter <= counter+1;
+//        clk_out <= (counter == divisor-1)?1'b1:1'b0;
+//        end
+//    if(counter >= 300000000) // not sure this is supposed to be 3 seconds. 100Mhz/2 
+//    counter <= 0;
+//    else
+//    counter <= counter+1;
+//    end
+//    assign clk_out = (counter == 300000000)? 1:0;
+endmodule
+module fsm(
+    input logic clk,
+    input logic reset,
+    input logic SA, SB,
+    output logic [2:0] LA, [2:0] LB
+    );
+    typedef enum logic [2:0]{S0,S1,S2,S3,S4,S5,S6,S7} statetype;
+    statetype state, nextstate; // dont put [2:0] here
+//    parameter red = 3'b111;
+//    parameter yellow = 3'b001;
+//    parameter green = 3'b011;
+    //state register
+    always_ff @(posedge clk, posedge reset)
+        if(reset) state <= S0;
+        else state <= nextstate;
+    //next state logic
+    always_comb
+        case(state)
+        S0: if((~SA&SB)|(SA&SB)) nextstate = S1;
+            else nextstate = S0;
+        S1: nextstate = S2;
+        S2: nextstate = S3;
+        S3: nextstate = S4;
+        S4: if(~SA&SB) nextstate = S4;
+            else nextstate = S5;
+        S5: nextstate = S6;
+        S6: nextstate = S7;
+        S7: nextstate = S0;
+        endcase
+     //output logic  red=111 green=011 yellow=001 la2 la1 la0 lb2 lb1 lb0
+     assign LA[0] = 1;
+     assign LA[1] = (state[2]^state[1]) | (state[2]&state[1]&~state[0]) | (~state[2]&~state[1]&~state[0]);
+     assign LA[2] = (state[2]^state[1]) | (state[2]&state[1]&~state[0]);
+     assign LB[0] = 1;
+     assign LB[1] = (~state[2]&~state[1]) | (~state[2]&state[1]&~state[0]) | (state[2]&~state[1]&~state[0]) | (state[2]&state[1]);
+     assign LB[2] = (~state[2]&~state[1]) | (~state[2]&state[1]&~state[0]) | (state[2]&state[1]);
+//     always_comb
+//     case(state)
+//        S0: begin
+//        LA = green;
+//        LB = red;
+//        end
+//        S1: begin
+//        LA= yellow;
+//        LB= red;
+//        end
+//        S2: begin
+//        LA= red;
+//        LB= red;
+//        end
+//        S3: begin
+//        LA= red;
+//        LB= yellow;
+//        end
+//        S4: begin
+//        LA= red;
+//        LB= green;
+//        end
+//        S5: begin
+//        LA= red;
+//        LB= yellow;
+//        end
+//        S6: begin
+//        LA= red;
+//        LB= red;
+//        end
+//        S7: begin
+//        LA= yellow;
+//        LB= red;
+//        end
+//     endcase
+        
+     
+endmodule
+module fsm_tb();  //write testbench for fsm not fsm_3sec(not working)
+logic clk, reset, SA, SB;
+logic [2:0] LA, LB;
+//fsm_3sec dut( .clk(clk), .reset(reset), .SA(SA), .SB(SB), .LA(LA), .LB(LB));
+//initial begin
+//        reset <= 1; SB = 0; SA = 0; #20;
+//        reset <= 0; #20;
+//    end   
+//    always begin
+//        SB <= ~SB; #20;
+//        SA <= ~SA; #20;
+//        clk <= 1;  #10;
+//        clk <= 0;  #10;
+//    end
+//fsm_3sec dut(clk,reset,SA,SB,LA,LB);
+//    initial
+//        begin
+//        reset = 1; #100;
+//        reset = 0;  
+//        SA = 0; SB = 0; #100; 
+//        SA = 0; SB = 1; #100; 
+//        SA = 0; SB = 0; #100; 
+//        SA = 1; SB = 0; #100; 
+//        SA = 0; SB = 0; #100; 
+//        SA = 1; SB = 1; #100;  
+////        SA = 1; #80;
+////        SA = 1; SB = 0; #40;
+////        SA = 0; #40;
+//        end
+//        always
+//        begin
+//        clk <= 1; #5;
+//        clk <= 0; #5;
+//        end
+        
+fsm dut(clk, reset, SA, SB, LA, LB);
+always
+        begin
+        clk <=1; #10;
+        clk <=0; #10;
+        end
+
+    initial
+        begin 
+        reset = 1; #100;
+        reset = 0; 
+        SA = 0; SB = 0; #100;
+        SA = 0; SB = 1; #100;
+        SA = 0; SB = 0; #100;
+        SA = 1; SB = 0; #100;
+        SA = 0; SB = 0; #100;
+        SA = 1; SB = 1; #100;
+        reset =1;
+        SA = 0; SB = 0; #100;
+        SA = 0; SB = 1; #100;
+        SA = 0; SB = 0; #100;
+        SA = 1; SB = 0; #100;
+        SA = 0; SB = 0; #100;
+        SA = 1; SB = 1; #100;
+       end
+        
+        
+endmodule
+## This file is a general .xdc for the Basys3 rev B board
+## To use it in a project:
+## - uncomment the lines corresponding to used pins
+## - rename the used ports (in each line, after get_ports) according to the top level signal names in the project
+
+# Clock signal
+set_property PACKAGE_PIN W5 [get_ports clk]							
+	set_property IOSTANDARD LVCMOS33 [get_ports clk]
+	create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk]
+ 
+# Switches
+set_property PACKAGE_PIN V17 [get_ports {reset}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {reset}]
+set_property PACKAGE_PIN V16 [get_ports {SA}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {SA}]
+set_property PACKAGE_PIN W16 [get_ports {SB}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {SB}]
+#set_property PACKAGE_PIN W17 [get_ports {sw[3]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[3]}]
+#set_property PACKAGE_PIN W15 [get_ports {sw[4]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[4]}]
+#set_property PACKAGE_PIN V15 [get_ports {sw[5]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[5]}]
+#set_property PACKAGE_PIN W14 [get_ports {sw[6]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[6]}]
+#set_property PACKAGE_PIN W13 [get_ports {sw[7]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[7]}]
+#set_property PACKAGE_PIN V2 [get_ports {sw[8]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[8]}]
+#set_property PACKAGE_PIN T3 [get_ports {sw[9]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[9]}]
+#set_property PACKAGE_PIN T2 [get_ports {sw[10]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[10]}]
+#set_property PACKAGE_PIN R3 [get_ports {sw[11]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[11]}]
+#set_property PACKAGE_PIN W2 [get_ports {sw[12]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[12]}]
+#set_property PACKAGE_PIN U1 [get_ports {sw[13]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[13]}]
+#set_property PACKAGE_PIN T1 [get_ports {sw[14]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[14]}]
+#set_property PACKAGE_PIN R2 [get_ports {sw[15]}]					
+	#set_property IOSTANDARD LVCMOS33 [get_ports {sw[15]}]
+ 
+
+# LEDs
+set_property PACKAGE_PIN U16 [get_ports {LA[0]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {LA[0]}]
+set_property PACKAGE_PIN E19 [get_ports {LA[1]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {LA[1]}]
+set_property PACKAGE_PIN U19 [get_ports {LA[2]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {LA[2]}]
+set_property PACKAGE_PIN V19 [get_ports {LB[0]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {LB[0]}]
+set_property PACKAGE_PIN W18 [get_ports {LB[1]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {LB[1]}]
+set_property PACKAGE_PIN U15 [get_ports {LB[2]}]					
+	set_property IOSTANDARD LVCMOS33 [get_ports {LB[2]}]
+#set_property PACKAGE_PIN U14 [get_ports {LED[6]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[6]}]
+#set_property PACKAGE_PIN V14 [get_ports {LED[7]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[7]}]
+#set_property PACKAGE_PIN V13 [get_ports {LED[8]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[8]}]
+#set_property PACKAGE_PIN V3 [get_ports {LED[9]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[9]}]
+#set_property PACKAGE_PIN W3 [get_ports {LED[10]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[10]}]
+#set_property PACKAGE_PIN U3 [get_ports {LED[11]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[11]}]
+#set_property PACKAGE_PIN P3 [get_ports {LED[12]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[12]}]
+#set_property PACKAGE_PIN N3 [get_ports {LED[13]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[13]}]
+#set_property PACKAGE_PIN P1 [get_ports {LED[14]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[14]}]
+#set_property PACKAGE_PIN L1 [get_ports {LED[15]}]					
+#	set_property IOSTANDARD LVCMOS33 [get_ports {LED[15]}]
